@@ -1,0 +1,25 @@
+{
+  "name": "deck-api",
+  "version": "0.0.1",
+  "description": "A simple deck REST API for \u001b[D\u001b[C\u001b",
+  "main": "index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.mjs"
+  },
+  "keywords": [
+    "mysql"
+  ],
+  "author": "Juho Jokela",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^4.0.3"
+  },
+  "dependencies": {
+    "koa": "^2.13.0",
+    "koa-bodyparser": "^4.3.0",
+    "koa-json": "^2.0.2",
+    "koa-logger": "^3.2.1",
+    "koa-router": "^9.4.0"
+  }
+}

@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:8
+    restart: always
+    secrets:
+      - mysql_root_pw
+      - mysql_user
+      - mysql_user_pw
+      - mysql_db
+    environment:
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_pw
+      - MYSQL_USER_FILE=/run/secrets/mysql_user
+      - MYSQL_PASSWORD_FILE=/run/secrets/mysql_user_pw
+      - MYSQL_DATABASE_FILE=/run/secrets/mysql_db
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+    - 8080:8080
+  backend:
+    image: deck-backend:latest
+    environment:
+      - PORT=3000
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+
+secrets:
+  mysql_root_pw:
+    file: ./secrets/mysql-root
+  mysql_user:
+    file: ./secrets/mysql-user
+  mysql_user_pw:
+    file: ./secrets/mysql-user-pw
+  mysql_db:
+    file: ./secrets/mysql-db
