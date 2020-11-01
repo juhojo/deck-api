@@ -21,8 +21,11 @@ services:
     - 8080:8080
   backend:
     image: deck-backend:latest
+    secrets:
+      - jwt
     environment:
       - PORT=3000
+      - NODE_ENV=production
     ports:
       - 3000:3000
     depends_on:
@@ -30,10 +33,12 @@ services:
 
 secrets:
   mysql_root_pw:
-    file: ./secrets/mysql-root
+    file: ./secrets/mysql_root
   mysql_user:
-    file: ./secrets/mysql-user
+    file: ./secrets/mysql_user
   mysql_user_pw:
-    file: ./secrets/mysql-user-pw
+    file: ./secrets/mysql_user_pw
   mysql_db:
-    file: ./secrets/mysql-db
+    file: ./secrets/mysql_db
+  jwt:
+    file: ./secrets/jwt

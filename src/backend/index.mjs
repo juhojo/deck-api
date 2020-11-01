@@ -1,66 +1,56 @@
 import Koa from "koa";
-import Router from "koa-router";
 import logger from "koa-logger";
-import json from "koa-json";
+import bodyParser from "koa-bodyparser";
+import jwt from "koa-jwt";
+import cors from "@koa/cors";
+
+import Debug from "debug";
+import Objection from "objection";
+const { Model } = Objection;
+
+import secrets from "./util/secrets.mjs";
+import publicRouter from "./routes/public.mjs";
+import authRouter from "./routes/auth.mjs";
+import deckRouter from "./routes/deck.mjs";
+
+import errorMiddleware from "./routes/middlewares/errors.mjs";
+
+import knex from "./db/knex.mjs";
+
+// Define constant (global) value for standard deck size.
+global.DECK_SIZE = 52;
+
+Model.knex(knex);
 
 const app = new Koa();
-const router = new Router();
+const debug = Debug("main");
 
-// Ping
-router.get("/ping", async (ctx, next) => {
-    ctx.body = { msg: "pong" };
+/* Middlewares */
+app
+  .use(errorMiddleware)
+  .use(bodyParser())
+  .use(logger())
+  .use(cors())
+  .use(
+    jwt({ secret: secrets.read("jwt") }).unless({
+      path: [/^\/public/, /^\/auth/],
+    })
+  );
 
-    await next();
-});
+/* Attach routes */
+app.use(publicRouter.routes());
+app.use(publicRouter.allowedMethods());
 
-router.post("/deck", async (ctx, next) => {
-    // TODO: Create new deck
+app.use(authRouter.routes());
+app.use(authRouter.allowedMethods());
 
-    ctx.body = { msg: "deck post" };
+app.use(deckRouter.routes());
+app.use(deckRouter.allowedMethods());
 
-    await next();
-});
+// Log all errors
+app.on("error", console.error);
 
-router.get("/deck/:id", async (ctx, next) => {
-    // TODO: Get info of a deck
-    const { id: deckId } = ctx.params;
-
-    ctx.body = { msg: deckId };
-    
-    await next();
-});
-
-router.delete("/deck/:id", async (ctx, next) => {
-    // TODO: Delete a deck
-    const { id: deckId } = ctx.params;
-
-    await next();
-});
-
-router.put("/deck/:id/shuffle", async (ctx, next) => {
-    // TODO: Shuffle the cards in deck
-    const { id: deckId } = ctx.params;
-    
-    await next();
-});
-
-router.put("/deck/:id/deal/:n", async (ctx, next) => {
-    // TODO: Deal n-cards from deck
-    const { id: deckId, n } = ctx.params; 
-    
-    ctx.body = { msg: `id is ${deckId} and for ${n} cards.`}
-
-    await next();
-});
-
-// Middlewares
-app.use(json());
-app.use(logger());
-
-// Attach routes
-app.use(router.routes())
-    .use(router.allowedMethods());
-
-app.listen((process.env.PORT || 3000), () => {
-    console.log("Backend started.");
+/* Attach app to port */
+app.listen(process.env.PORT || 3000, () => {
+  debug("Backend started.");
 });
